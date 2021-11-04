@@ -5,7 +5,7 @@ Team Number – 13</br>
 Members:Suvadeep Maiti - 2021702021</br>
 &emsp; &emsp;&emsp; &emsp;Praguna Manvi - 2021701031</br>
 &emsp; &emsp;&emsp; &emsp;Haasith Pasala - 2021702017</br>
-&emsp; &emsp;&emsp; &emsp;Laksh Nanwani – 2021701002</br>
+&emsp; &emsp;&emsp; &emsp;Laksh Nanwani - 2021701002</br>
 ### Project objectives:</br>
 • Build Lenet – 5 from scratch using basic libraries such as NumPy.</br>
 • Evaluate with inbuilt Lenet – 5 model trained with libraries.</br>
