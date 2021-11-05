@@ -2,7 +2,7 @@
 __Team Name__ – Outliers</br>
 __Team Number__ – 13</br>
 </br>
-__Members:__ &emsp;Suvadeep Maiti - 2021702021</br>
+__Members:__ &nbsp;&nbsp;Suvadeep Maiti - 2021702021</br>
 &emsp; &emsp;&emsp; &emsp; &emsp;Praguna Manvi - 2021701031</br>
 &emsp; &emsp;&emsp; &emsp; &emsp;Haasith Pasala - 2021702017</br>
 &emsp; &emsp;&emsp; &emsp; &emsp;Laksh Nanwani - 2021701002</br>
