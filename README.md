@@ -1,4 +1,4 @@
-## LENET :</br>
+## LENET-5 :</br>
 __Team Name__ – Outliers</br>
 __Team Number__ – 13</br>
 </br>
@@ -6,6 +6,15 @@ __Members:__ &nbsp;&nbsp;Suvadeep Maiti - 2021702021</br>
 &emsp; &emsp;&emsp; &emsp; &emsp;Praguna Manvi - 2021701031</br>
 &emsp; &emsp;&emsp; &emsp; &emsp;Haasith Pasala - 2021702017</br>
 &emsp; &emsp;&emsp; &emsp; &emsp;Laksh Nanwani - 2021701002</br>
+
+</br>
+
+### Problem Statement: </br>
+
+Implementing Lenet-5, a simple and straighforward convolutional neural network architecture with gradient-based learning, from scratch, for recognizing handwritten digits. Lenet-5 comprises of 7 layers,not counting the input, all of which contains trainable parameters(weights). It takes an input of 32x32 pixel image and outputs the likelihood of the digit present in the image.
+
+<img src="lenet.png" alt="Lenet-5"/>
+
 ### Project objectives:</br>
 • Build Lenet – 5 from scratch using basic libraries such as NumPy.</br>
 • Evaluate with inbuilt Lenet – 5 model trained with libraries.</br>
@@ -27,6 +36,18 @@ __Members:__ &nbsp;&nbsp;Suvadeep Maiti - 2021702021</br>
 | 21<sup>st</sup> – 27<sup>th</sup> Nov  | Backpropagation implementation  |
 | 27<sup>th</sup> Nov – 3<sup>rd</sup> Dec  | Training, testing, Analysis and ppt preparation  |
 | 4<sup>th</sup> Dec  | Final Evaluation  |
+
+</br>
+
+### Work Distribution:</br>
+</br>
+
+| Member | Task |
+| ------------- | ------------- |
+| Suvadeep | Preprocessing, Convolution - Forward & backward |
+| Praguna  | Training, Sub-sampling - Forward & backward  |
+| Laksh | Testing, Full connection - Forward & backward, Combining layers |
+| Haasith | PPT, Gaussian connections - Forward & backward  |
 
 </br>
 
