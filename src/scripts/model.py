@@ -36,6 +36,8 @@ class BaseLayer(object):
         def update(dW, db, t = 1):
             if self.m_dw is None or self.m_db is None or self.v_dw is None or self.v_db is None:
                 self.m_dw, self.m_db, self.v_dw, self.v_db =  np.zeros(dW.shape) , np.zeros(db.shape), np.zeros(dW.shape), np.zeros(db.shape)
+            if self.m_dw.shape != dW.shape or self.m_db.shape != db.shape:
+                self.m_dw, self.m_db, self.v_dw, self.v_db =  np.zeros(dW.shape) , np.zeros(db.shape), np.zeros(dW.shape), np.zeros(db.shape)
             self.m_dw = self.beta1*self.m_dw + (1-self.beta1)*dW
             self.m_db = self.beta1*self.m_db + (1-self.beta1)*db
             self.v_dw = self.beta2*self.v_dw + (1-self.beta2)*(dW**2)
@@ -110,25 +112,25 @@ class SubSample(BaseLayer):
         assert len(in_shape) == 3
         self.in_shape = in_shape
         self.out_shape = ( (in_shape[0] - self.kernel_shape) // self.stride + 1, (in_shape[1] - self.kernel_shape + 1) //self.stride + 1 , in_shape[-1] )
-        self.param_shape = (self.kernel_shape, self.kernel_shape) + (self.in_shape[-1], )
-        self.params = np.random.rand(self.in_shape[-1], ),  np.random.rand(self.in_shape[-1], )
+        self.params = np.random.normal(0, 0.1, (1,1,1,self.in_shape[-1])),  np.random.normal(0, 0.1, (1,1,1,self.in_shape[-1]))
         return self
 
     def __call__(self, input):
         o = np.zeros((input.shape[0], ) + self.out_shape) 
-        for h in range(self.param_shape[0]):
-            for w in range(self.param_shape[1]):
+        for h in range(self.out_shape[0]):
+            for w in range(self.out_shape[1]):
                 slice = input[:, h*self.stride:h*self.stride+self.kernel_shape, w*self.stride:w*self.stride+self.kernel_shape, :]
                 o[:, h, w, :] = np.average(slice, axis=(1,2))
         self.cache = (input, o)
         o = self.params[0] * o + self.params[1]
-        assert o.shape == (input.shape[0], ) + self.out_shape
         return o
 
     def __gradients__(self, next_d):
         prev_input, out_ = self.cache
-        db = next_d
-        dW = np.sum(np.multiply(next_d, out_))
+        # db = next_d
+        # dW = np.sum(np.multiply(next_d, out_))
+        db = np.mean(next_d, axis=(0,1,2), keepdims=True)
+        dW = np.mean(np.multiply(next_d, out_), axis = (0,1,2), keepdims=True)
         next_d_after = next_d * self.params[0]
         dinput = np.zeros(prev_input.shape)
         for h in range(self.out_shape[0]):
@@ -139,7 +141,7 @@ class SubSample(BaseLayer):
         return dW, db, dinput
 
     def __str__(self) -> str:
-        return f"SubSample{self.param_shape, self.params[1].shape}"
+        return f"SubSample{self.params[0].shape, self.params[0].shape}"
 
 class Activation(object):
 
@@ -246,7 +248,6 @@ class Lenet_SMAI(object):
             Activation(),
             RBF(10)
         ]
-        self.batch_size = None
         self.input_shape = input_shape
         prev_input_shape = input_shape
         for layer in self.layers:
