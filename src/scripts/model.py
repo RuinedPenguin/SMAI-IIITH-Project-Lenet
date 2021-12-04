@@ -179,8 +179,8 @@ class RBF(object):
     
     def init_layer(self, in_shape):
         self.in_shape = in_shape
-        self.out_shape = (self.outputs, 1)
-        self.param_shape = (self.out_shape[0], np.product(self.in_shape))
+        self.out_shape = (1, 1)
+        self.param_shape = (self.outputs, np.product(self.in_shape))
         self.params = ( np.random.choice([-1, 1], self.param_shape) , )
         return self
     
