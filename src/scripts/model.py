@@ -11,7 +11,7 @@ __builtin_funcs__ =  {
 
 def initialize(shape):
     mu, sigma = 0, 0.1
-    b_shape = (shape[-1],1)
+    b_shape = (1,1,1,shape[-1]) if len(shape)==4 else (shape[-1],)
     weight = np.random.normal(mu, sigma,  shape)
     bias  = np.ones(b_shape)*0.01
     return weight, bias
@@ -19,6 +19,9 @@ def initialize(shape):
 def total_params(params : 'list(tuple)') -> int:
     if not params: return 0
     return np.sum([np.prod(e.shape) for e in params])
+
+def zero_pad(input, pad):
+    return np.pad(input, ((0, ), (pad, ), (pad, ), (0, )), 'constant', constant_values=(0, 0))    
 
 class Conv2D(object):
 
@@ -39,10 +42,28 @@ class Conv2D(object):
         return self
 
     def __call__(self, input):
-        pass
+        z = np.zeros((input.shape[0], ) + self.out_shape)
+        input_pad = zero_pad(input, self.padding)
+        for h in range(self.out_shape[0]):
+            for w in range(self.out_shape[1]):
+                slice = input_pad[:, h*self.stride:h*self.stride+self.kernel_shape[0], w*self.stride:w*self.stride+self.kernel_shape[1], :]
+                z[:, h, w, :] = np.tensordot(slice, self.params[0], axes=([1,2,3],[0,1,2])) + self.params[1]
+        self.cache = input
+        return z
 
     def __gradients__(self, next_d):
-        pass
+        dinput = zero_pad(np.zeros(self.cache.shape), self.padding)
+        dW = np.zeros(self.params[0].shape)
+        db = np.zeros(self.params[1].shape)
+        cache_padded = zero_pad(self.cache, self.padding)
+        for h in range(self.out_shape[0]):
+            for w in range(self.out_shape[1]):
+                s, e = (h*self.stride, h*self.stride+self.kernel_shape[0]), (w*self.stride, w*self.stride+self.kernel_shape[1])
+                slice = cache_padded[:,s[0]:s[1], e[0]:e[1], :]
+                dinput[:, s[0]:s[1], e[0]:e[1], :] += np.transpose(self.params[0] @ next_d[:, h, w, :].T, (3,0,1,2))
+                dW += np.transpose(slice, (1,2,3,0)), next_d[:, h, w, :]
+                db += np.sum(next_d[:, h, w, :], axis=0)
+        return dW, db, dinput
 
     def __str__(self) -> str:
         return f"CONV2D{self.param_shape ,  self.params[1].shape}"
@@ -67,10 +88,28 @@ class SubSample(object):
         return self
 
     def __call__(self, input):
-        pass
+        o = np.zeros((input.shape[0], ) + self.out_shape) 
+        for h in range(self.param_shape[0]):
+            for w in range(self.param_shape[1]):
+                slice = input[:, h*self.stride:h*self.stride+self.kernel_shape, w*self.stride:w*self.stride+self.kernel_shape, :]
+                o[:, h, w, :] = np.average(slice, axis=(1,2))
+        self.cache = (input, o)
+        o = self.params[0] * o + self.params[1]
+        assert o.shape == (input.shape[0], ) + self.out_shape
+        return o
 
     def __gradients__(self, next_d):
-        pass
+        prev_input, out_ = self.cache
+        db = next_d
+        dW = np.sum(np.multiply(next_d, out_))
+        next_d_after = next_d * self.params[0]
+        dinput = np.zeros(prev_input.shape)
+        for h in range(self.out_shape[0]):
+            for w in range(self.out_shape[1]):
+                s , e = (h*self.stride, h*self.stride+self.kernel_shape), (w*self.stride, w*self.stride+self.kernel_shape)
+                da = next_d_after[:, h, w, :][:,np.newaxis,np.newaxis,:]
+                dinput[:, s[0]: s[1], e[0]: e[1], :] += np.repeat(np.repeat(da, 2, axis=1), 2, axis=2)/self.kernel_shape/self.kernel_shape
+        return dW, db, dinput
 
     def __str__(self) -> str:
         return f"SubSample{self.param_shape, self.params[1].shape}"
@@ -95,7 +134,7 @@ class Activation(object):
         return self
 
     def __gradients__(self, next_d):
-        return next_d * self.func_d(self.cache)
+        return None, None, next_d * self.func_d(self.cache)
     
     def __str__(self) -> str:
         return f"Activation({self.name})"
@@ -109,22 +148,28 @@ class RBF(object):
         self.params = None, None
         self.in_shape, self.out_shape = None, None
     
-    def __call__(self, input):
-        self.cache = input
-        return 0.5 * np.sum((self.cache - self.params[0]) ** 2, axis = 1) + self.params[1]
-    
     def init_layer(self, in_shape):
         self.in_shape = in_shape
         self.out_shape = (self.outputs, 1)
-        self.param_shape = (np.product(self.in_shape), self.out_shape[0])
-        self.params = initialize(self.param_shape)
+        self.param_shape = (self.out_shape[0], np.product(self.in_shape))
+        self.params = ( np.random.choice([-1, 1], self.param_shape) , )
         return self
+    
+    def __call__(self, input, label, mode = 'test'):
+        if mode == 'test': return self.predict(input)
+        self.cache = input , self.params[0][label, :]
+        return np.sum(0.5 * np.sum((self.cache[0] - self.cache[1]) ** 2, axis = 1, keepdims=True))
+    
+    def predict(self, input):
+        sq_diff = input[:, np.newaxis, :] - np.array([self.params[0]] * input.shape[0]) ** 2
+        pred = np.argmin(np.sum(sq_diff, axis=2), axis = 1)
+        return pred
 
-    def __gradients__(self, next_d):
-        return -next_d * (self.cache - self.params[0]), next_d, np.sum(next_d * (self.cache - self.params[0]), axis=0)
+    def __gradients__(self, next_d = 1):
+        return None, None, next_d * (self.cache[0] - self.cache[1])
     
     def __str__(self) -> str:
-        return f"RBF{self.param_shape, self.params[1].shape}"
+        return f"RBF{self.param_shape}"
 
 class Dense(object):
 
@@ -136,8 +181,8 @@ class Dense(object):
         self.in_shape, self.out_shape = None, None
     
     def __call__(self, input):
-        self.cache = input.reshape(1, -1)
-        return (self.cache @ self.params[0]).T + self.params[1]
+        self.cache = input.reshape((input.shape[0]), np.prod(list(input.shape)[1:]))
+        return  np.matmul(self.cache , self.params[0]) + self.params[1]
     
     def init_layer(self, in_shape):
         self.in_shape = in_shape
@@ -147,7 +192,7 @@ class Dense(object):
         return self
 
     def __gradients__(self, next_d):
-        return (next_d @ self.cache.T).T, next_d, next_d.T @ self.params[0].T
+        return np.matmul(self.cache.T ,  next_d), np.sum(next_d.T, axis = 1), np.matmul(self.params[0].T, next_d)
     
     def __str__(self) -> str:
         return f"Dense{self.param_shape, self.params[1].shape}"
@@ -187,18 +232,17 @@ class Lenet_SMAI(object):
         print(tabulate(table, headers=["in", "Name (weight, bias) ", "out", "total_params"], tablefmt="psql"))
         print(f"Total Number of parameters = {total}")
 
-    def compile(self, loss_func = 'mse', lr = 0.01):
-        self.loss_func = __builtin_funcs__[loss_func]
+    def compile(self, lr = 0.01):
         self.lr = lr
 
-    def __call__(self, input, batch_size = 32):
-        assert input.shape
-        pass
+    def __call__(self, input, label=None, mode = 'train'):
+        o = input
+        for layer in self.layers:
+            if isinstance(layer, RBF): o = layer(o, label, mode)
+            else: o = layer(o)
+        return o
 
     def compute_gradients(self):
-        pass
-
-    def compute_loss(self):
         pass
 
     def apply_gradients(self):
@@ -207,5 +251,5 @@ class Lenet_SMAI(object):
 if __name__ == "__main__":
     model = Lenet_SMAI()
     model.summary()
-    model.compile()
-    # print(model(np.random.rand(512, 32, 32, 1), 32))
+    print(model(np.random.rand(512, 32, 32, 1), np.random.randint(0, 10,(512,))))
+    print(model(np.random.rand(512, 32, 32, 1), mode='test').shape)
