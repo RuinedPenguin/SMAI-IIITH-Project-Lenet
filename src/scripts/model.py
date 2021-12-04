@@ -1,10 +1,8 @@
-from functools import cache
 import numpy as np
-from numpy.lib.function_base import gradient
-from numpy.random.mtrand import rand
 import time
 # !pip3 install tabulate
 from tabulate import tabulate
+from RBF_init import rbf_initialize
 np.random.seed(10)
 
 __builtin_funcs__ =  {
@@ -137,7 +135,7 @@ class SubSample(BaseLayer):
             for w in range(self.out_shape[1]):
                 s , e = (h*self.stride, h*self.stride+self.kernel_shape), (w*self.stride, w*self.stride+self.kernel_shape)
                 da = next_d_after[:, h, w, :][:,np.newaxis,np.newaxis,:]
-                dinput[:, s[0]: s[1], e[0]: e[1], :] += np.repeat(np.repeat(da, 2, axis=1), 2, axis=2)/self.kernel_shape/self.kernel_shape
+                dinput[:, s[0]: s[1], e[0]: e[1], :] += np.repeat(np.repeat(da, self.kernel_shape, axis=1), self.kernel_shape, axis=2)/(self.kernel_shape * self.kernel_shape)
         return dW, db, dinput
 
     def __str__(self) -> str:
@@ -181,7 +179,9 @@ class RBF(object):
         self.in_shape = in_shape
         self.out_shape = (1, 1)
         self.param_shape = (self.outputs, np.product(self.in_shape))
-        self.params = ( np.random.choice([-1, 1], self.param_shape) , )
+        # self.params = ( np.random.choice([-1, 1], self.param_shape) , )
+        self.params = (rbf_initialize(), )
+        assert self.param_shape == self.params[0].shape
         return self
     
     def __call__(self, input, label, mode = 'test'):
