@@ -2,6 +2,7 @@
 __Team Name__ – Outliers</br>
 __Team Number__ – 13</br>
 </br>
+
 __Members:__ &nbsp; &nbsp; Suvadeep Maiti - 2021702021</br>
 &emsp; &emsp;&emsp; &emsp; &emsp;Praguna Manvi - 2021701031</br>
 &emsp; &emsp;&emsp; &emsp; &emsp;Haasith Pasala - 2021702017</br>
@@ -13,7 +14,7 @@ __Members:__ &nbsp; &nbsp; Suvadeep Maiti - 2021702021</br>
 
 Implementing Lenet-5, a simple and straighforward convolutional neural network architecture with gradient-based learning, for recognizing handwritten digits, from scratch. Lenet-5 comprises of 7 layers, not counting the input, all of which contains trainable parameters(weights). It takes an input of 32x32 pixel image and outputs the likelihood of the digit present in the image.
 
-<img src="lenet.png" alt="Lenet-5" />
+<img src="images/lenet.png" alt="Lenet-5" />
 
 ### Project objectives:</br>
 • Build Lenet – 5 from scratch using basic libraries such as NumPy.</br>
