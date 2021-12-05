@@ -3,7 +3,6 @@ import time
 # !pip3 install tabulate
 from tabulate import tabulate
 from RBF_init import rbf_initialize
-np.random.seed(10)
 
 __builtin_funcs__ =  {
     'tanh' : (lambda x : 1.7159*np.tanh(2*x/3), lambda x : 1.14393*(1-np.power(np.tanh(2*x/3),2))),
@@ -98,7 +97,7 @@ class Conv2D(BaseLayer):
         return f"CONV2D{self.param_shape ,  self.params[1].shape}"
 
 
-class SubSample(BaseLayer):
+class SubSample(object):
 
     def __init__(self, kernel_shape, stride = 2, padding = 0) -> None:
         super().__init__()
@@ -122,13 +121,11 @@ class SubSample(BaseLayer):
                 slice = input[:, h*self.stride:h*self.stride+self.kernel_shape, w*self.stride:w*self.stride+self.kernel_shape, :]
                 o[:, h, w, :] = np.average(slice, axis=(1,2))
         self.cache = (input, o)
-        o = self.params[0] * o + self.params[1]
-        return o
+        output = o * self.params[0] + self.params[1]
+        return output
 
     def __gradients__(self, next_d):
         prev_input, out_ = self.cache
-        # db = next_d
-        # dW = np.sum(np.multiply(next_d, out_))
         db = np.mean(next_d, axis=(0,1,2), keepdims=True)
         dW = np.mean(np.multiply(next_d, out_), axis = (0,1,2), keepdims=True)
         next_d_after = next_d * self.params[0]
@@ -192,8 +189,9 @@ class RBF(object):
         return np.sum(0.5 * np.sum((self.cache[0] - self.cache[1]) ** 2, axis = 1, keepdims=True))
     
     def predict(self, input):
-        sq_diff = input[:, np.newaxis, :] - np.array([self.params[0]] * input.shape[0]) ** 2
-        pred = np.argmin(np.sum(sq_diff, axis=2), axis = 1)
+        sq_diff = np.square(input[:, np.newaxis, :] - np.array([self.params[0]] * input.shape[0]))
+        sq_diff_sum = np.sum(sq_diff, axis=2)
+        pred = np.argmin(sq_diff_sum, axis = 1)
         return pred
 
     def __gradients__(self, next_d = 1):
@@ -237,11 +235,11 @@ class Lenet_SMAI(object):
         self.name = name
         self.layers = [
             Conv2D(6, (5,5)),
-            SubSample(2),
             Activation(),
+            SubSample(2),
             Conv2D(16, (5,5)),
-            SubSample(2),
             Activation(),
+            SubSample(2),
             Conv2D(120, (5,5)),
             Activation(),
             Dense(84),
@@ -267,7 +265,7 @@ class Lenet_SMAI(object):
     def compile_adam(self, b1= 0.9, b2 = 0.999, epsilon = 1e-8, eta = 0.01):
          self.optimizer = 'adam'
          for l in self.layers:
-            if isinstance(l, BaseLayer): l.compile_adam(b1= 0.9, b2 = 0.999, epsilon = 1e-8, eta = 0.01)
+            if isinstance(l, BaseLayer): l.compile_adam(b1= b1, b2 = b2, epsilon = epsilon, eta = eta)
 
 
     def __call__(self, input, label=None, mode = 'train'):
@@ -294,11 +292,12 @@ class Lenet_SMAI(object):
 
 
 if __name__ == "__main__":
+    np.random.seed(10)
     model = Lenet_SMAI()
     model.summary()
     model.compile_adam()
-    batch_size = 512
-    itr = 10
+    batch_size = 32
+    itr = 500
     st = time.time()
     img, label = np.random.rand(batch_size, 32, 32, 1), np.random.randint(0, 10,(batch_size,))
     for i in range(itr):
@@ -306,5 +305,5 @@ if __name__ == "__main__":
         print(loss)
         grads = model.compute_gradients()
         model.apply_gradients(grads)
-    print(model(np.random.rand(batch_size, 32, 32, 1), mode='test').shape)
+    print(f"accuracy : {np.count_nonzero(model(img, mode='test') == label) / batch_size}")
     print(f'took {time.time() - st} for {itr} batch steps of size {batch_size}, 1 prediction')
