@@ -115,12 +115,17 @@ The result is supposed to be :</br>
 
 | Member | Tasks |
 | ------------- | ------------- |
-| Suvadeep | Preprocessing, Convolution - Forward & backward |
-| Praguna  | Training, Sub-sampling, Combining layers |
-| Laksh | Testing, Full connection - Forward & backward |
-| Haasith | PPT, Gaussian connections - Forward & backward  |
+| Suvadeep | Activation functions, forward propagation, report formatting and model fine tuning |
+| Praguna  | Gradient computation, optimizing performance, fine tuning, adam optimizer and flask visual tool |
+| Laksh | Forward propagation, preprocessing, model fine tuning, and code reorganisation |
+| Haasith | Model training, evaluation and fine tuning,  back propagation and flask visual tool |
 
 </br>
 
 ### References:</br>
-1. http://vision.stanford.edu/cs598_spring07/papers/Lecun98.pdf</br>
+
+Lenet :   Yann LeCun, Leon Bottou, Yoshua Bengio and Patrick HanerLenet, http://vision.stanford.edu/cs598_spring07/papers/Lecun98.pdf,  IEEE NOVEMBER 1998
+
+Adam : Diederik P. Kingma, Jimmy Lei Ba, https://arxiv.org/pdf/1412.6980.pdf,  ICLR 2015
+
+Visual Tool : https://github.com/hugom1997/Flask-Cnn-Recognition-App
