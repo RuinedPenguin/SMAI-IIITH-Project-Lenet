@@ -1,4 +1,4 @@
-from lenet import Lenet_SMAI()
+from lenet import Lenet_SMAI
 import numpy as np
 import time
 
