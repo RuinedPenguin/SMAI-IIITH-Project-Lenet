@@ -12,7 +12,7 @@ print(root)
 sys.path.append(os.path.join(root, 'src', 'scripts'))
 # print(os.path.join(root, '/scripts'))
 
-import model as lenet_utils
+from lenet import Lenet_SMAI
 
 #Initialize the useless part of the base64 encoded image.
 init_Base64 = 21
@@ -35,7 +35,7 @@ def normalize(image):
 
 # Use pickle to load in the pre-trained model.
 with open(model_path, 'rb') as f:
-        model = lenet_utils.Lenet_SMAI()
+        model = Lenet_SMAI()
         weights = pickle.load(f)
         load_weights(model, weights)
 
