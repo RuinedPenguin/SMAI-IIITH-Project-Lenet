@@ -8,7 +8,8 @@ __builtin_funcs__ =  {
     'tanh' : (lambda x : 1.7159*np.tanh(2*x/3), lambda x : 1.14393*(1-np.power(np.tanh(2*x/3),2))),
     'mse' : (lambda x,y : np.mean(np.square(y - x)), lambda x,y : -np.mean(y - x, axis=1)),
     'sigmoid':(lambda x : 1 / (1 + np.exp(-x)), lambda x : np.exp(-x) / np.power((1+np.exp(-x)),2)),
-    'relu' : (lambda x : np.maximum(x,0), lambda x : (x>0)*1 )
+    'relu' : (lambda x : np.maximum(x,0), lambda x : (x>0)*1 ),
+    'leaky_relu' : (lambda np.where(x>0, x, 0.001*x) , lambda np.where(x>0, 1, 0.001))
 }
 
 def initialize(shape):
@@ -243,10 +244,10 @@ class Lenet_SMAI(object):
             Activation("relu"),
             SubSample(2),
             Conv2D(120, (5,5)),
-            Activation("relu"),
+            Activation("tanh"),
             Dense(84),
-            Activation("relu"),
-            RBF(10,)
+            Activation("tanh"),
+            RBF(10)
         ]
         self.input_shape = input_shape
         prev_input_shape = input_shape
