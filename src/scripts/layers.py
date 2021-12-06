@@ -1,9 +1,7 @@
 import numpy as np
-import time
-# !pip3 install tabulate
-from tabulate import tabulate
 from RBF_init import rbf_initialize
 
+# dictionary used to define a function f(x) and its derivative f'(x)
 __builtin_funcs__ =  {
     'tanh' : (lambda x : 1.7159*np.tanh(2*x/3), lambda x : 1.14393*(1-np.power(np.tanh(2*x/3),2))),
     'mse' : (lambda x,y : np.mean(np.square(y - x)), lambda x,y : -np.mean(y - x, axis=1)),
@@ -11,20 +9,23 @@ __builtin_funcs__ =  {
     'relu' : (lambda x : np.maximum(x,0), lambda x : (x>0)*1 )
 }
 
+# randomly initializes the weight and biases with the input shape, with uniform distribution
 def initialize(shape):
     mu, sigma = 0, 0.1
-    b_shape = (1,1,1,shape[-1]) if len(shape)==4 else (shape[-1],)
+    b_shape = (1,1,1,shape[-1]) if len(shape) == 4 else (shape[-1],)
     weight = np.random.normal(mu, sigma,  shape)
     bias  = np.ones(b_shape)*0.01
     return weight, bias
 
-def total_params(params : 'list(tuple)') -> int:
-    if not params: return 0
-    return np.sum([np.prod(e.shape) for e in params])
-
+# pads the input with zeros around the border
 def zero_pad(input, pad):
     return np.pad(input, ((0, ), (pad, ), (pad, ), (0, )), 'constant', constant_values=(0, 0))   
 
+
+
+""" *************** Layers *************** """
+
+# parent class BaseLayer, whih provides the basic structure to be followed all the different types of layers
 class BaseLayer(object):
     def __init__(self) -> None:
         super().__init__()
@@ -52,9 +53,10 @@ class BaseLayer(object):
             self.params = (w, b) 
         self.optimzers['adam'] = update
 
-
+# Convolutional Layer
 class Conv2D(BaseLayer):
-
+    
+#     initialises the parameters num_filters, kernel_shape, stride, padding
     def __init__(self, num_filters, kernel_shape, stride = 1, padding = 0) -> None:
         super().__init__()
         self.cache = None
@@ -62,7 +64,8 @@ class Conv2D(BaseLayer):
         self.kernel_shape, self.num_filters = kernel_shape, num_filters
         self.params = None, None
         self.padding, self.stride = padding, stride
-    
+        
+#     initialises the weights and biases according to above parameters
     def init_layer(self, in_shape):
         assert len(in_shape) == 3
         self.in_shape = in_shape
@@ -71,6 +74,7 @@ class Conv2D(BaseLayer):
         self.params = initialize(self.param_shape)
         return self
 
+#     forward pass
     def __call__(self, input):
         z = np.zeros((input.shape[0], ) + self.out_shape)
         input_pad = zero_pad(input, self.padding)
@@ -81,6 +85,7 @@ class Conv2D(BaseLayer):
         self.cache = input
         return z
 
+#     computes the gradients for back pass
     def __gradients__(self, next_d):
         dinput = zero_pad(np.zeros(self.cache.shape), self.padding)
         dW = np.zeros(self.params[0].shape)
@@ -98,7 +103,7 @@ class Conv2D(BaseLayer):
     def __str__(self) -> str:
         return f"CONV2D{self.param_shape ,  self.params[1].shape}"
 
-
+# A pooling layer, with trainable parameters
 class SubSample(BaseLayer):
 
     def __init__(self, kernel_shape, stride = 2, padding = 0) -> None:
@@ -142,31 +147,8 @@ class SubSample(BaseLayer):
     def __str__(self) -> str:
         return f"SubSample{self.params[0].shape, self.params[0].shape}"
 
-class Activation(object):
 
-    def __init__(self, name = 'tanh') -> None:
-        super().__init__()
-        self.name = name
-        self.cache = None
-        self.params = None
-        self.in_shape, self.out_shape = None, None
-        self.func, self.func_d = __builtin_funcs__[name]
-    
-    def __call__(self, input):
-        output, self.cache = self.func(input), input
-        return output
-    
-    def init_layer(self, in_shape):
-        self.in_shape = in_shape
-        self.out_shape = in_shape
-        return self
-
-    def __gradients__(self, next_d):
-        return None, None, next_d * self.func_d(self.cache)
-    
-    def __str__(self) -> str:
-        return f"Activation({self.name})"
-
+# Radial Basis Function layer
 class RBF(object):
     
     def __init__(self, outputs) -> None:
@@ -202,6 +184,7 @@ class RBF(object):
     def __str__(self) -> str:
         return f"RBF{self.param_shape}"
 
+# Fully Connected Layer
 class Dense(BaseLayer):
 
     def __init__(self, outputs) -> None:
@@ -227,85 +210,34 @@ class Dense(BaseLayer):
     
     def __str__(self) -> str:
         return f"Dense{self.param_shape, self.params[1].shape}"
-
-
-class Lenet_SMAI(object):
-
-    def __init__(self, input_shape = (32, 32, 1) ,name = 'Lenet') -> None:
-        super().__init__()
-        assert input_shape != None
-        self.name = name
-        self.layers = [
-            Conv2D(6, (5,5)),
-            Activation('relu'),
-            SubSample(2),
-            Conv2D(16, (5,5)),
-            Activation('relu'),
-            SubSample(2),
-            Conv2D(120, (5,5)),
-            Activation('tanh'),
-            Dense(84),
-            Activation('tanh'),
-            RBF(10)
-        ]
-        self.input_shape = input_shape
-        prev_input_shape = input_shape
-        for layer in self.layers:
-           prev_input_shape = layer.init_layer(prev_input_shape).out_shape
     
-    def summary(self):
-        print(f"\t\t-------{self.name}-------\t\t")
-        table = []
-        total = 0
-        for layer in self.layers:
-            t = total_params(layer.params)
-            table.append((layer.in_shape, str(layer), layer.out_shape, t))
-            total += t
-        print(tabulate(table, headers=["in", "Name (weight, bias) ", "out", "total_params"], tablefmt="psql"))
-        print(f"Total Number of parameters = {total}")
+    
+    
+""" *************** Activation *************** """
 
-    def compile_adam(self, b1= 0.9, b2 = 0.999, epsilon = 1e-8, eta = 0.01):
-         self.optimizer = 'adam'
-         for l in self.layers:
-            if isinstance(l, BaseLayer): l.compile_adam(b1= b1, b2 = b2, epsilon = epsilon, eta = eta)
+# activation class, added after any layer if non-linearity is to be introduced
+class Activation(object):
 
+#     initialisation for activation function, default is tanh
+    def __init__(self, name = 'tanh') -> None:
+        super().__init__()
+        self.name = name
+        self.cache = None
+        self.params = None
+        self.in_shape, self.out_shape = None, None
+        self.func, self.func_d = __builtin_funcs__[name]
 
-    def __call__(self, input, label=None, mode = 'train'):
-        o = input
-        for layer in self.layers:
-            if isinstance(layer, RBF): o = layer(o, label, mode)
-            else: o = layer(o)
-        return o
+    def __call__(self, input):
+        output, self.cache = self.func(input), input
+        return output
+    
+    def init_layer(self, in_shape):
+        self.in_shape = in_shape
+        self.out_shape = in_shape
+        return self
 
-    def compute_gradients(self):
-        next_d = 1
-        grads = {}
-        for layer in reversed(self.layers):
-            dW, db, next_d = layer.__gradients__(next_d)
-            if dW is None and db is None: continue
-            grads[layer] = (dW, db)
-        return grads
-
-    def apply_gradients(self, gradients):
-        for k,v in gradients.items():
-            dW, db = v
-            if isinstance(k, BaseLayer): k.optimzers[self.optimizer](dW , db)
-             
-
-
-if __name__ == "__main__":
-    np.random.seed(10)
-    model = Lenet_SMAI()
-    model.summary()
-    model.compile_adam()
-    batch_size = 32
-    itr = 500
-    st = time.time()
-    img, label = np.random.rand(batch_size, 32, 32, 1), np.random.randint(0, 10,(batch_size,))
-    for i in range(itr):
-        loss = model(img, label)
-        print(loss)
-        grads = model.compute_gradients()
-        model.apply_gradients(grads)
-    print(f"accuracy : {np.count_nonzero(model(img, mode='test') == label) / batch_size}")
-    print(f'took {time.time() - st} for {itr} batch steps of size {batch_size}, 1 prediction')
+    def __gradients__(self, next_d):
+        return None, None, next_d * self.func_d(self.cache)
+    
+    def __str__(self) -> str:
+        return f"Activation({self.name})"
