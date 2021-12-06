@@ -53,7 +53,7 @@ Implementing Lenet-5, a simple and straighforward convolutional neural network a
     └── README.md
 -----------
 </br>
-In the above structure, the source code is found in the 'src' directory.The scripts folder in this directory consists of code related to layers, Lenet-5 and RBF weights inititialisation. The noteobooks folder has Lenet.ipynb which has code for training, testing and analysis.
+In the above structure, the source code is found in the 'src' directory.The scripts folder in this directory consists of code related to layers, Lenet-5 and RBF weights inititialisation. The notebooks folder has Lenet.ipynb which has code for training, testing and analysis.
 </br>
 </br>
 
