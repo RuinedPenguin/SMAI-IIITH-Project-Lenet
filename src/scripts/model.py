@@ -237,15 +237,15 @@ class Lenet_SMAI(object):
         self.name = name
         self.layers = [
             Conv2D(6, (5,5)),
-            Activation("relu"),
+            Activation('relu'),
             SubSample(2),
             Conv2D(16, (5,5)),
-            Activation("relu"),
+            Activation('relu'),
             SubSample(2),
             Conv2D(120, (5,5)),
-            Activation("tanh"),
+            Activation('tanh'),
             Dense(84),
-            Activation("tanh"),
+            Activation('tanh'),
             RBF(10)
         ]
         self.input_shape = input_shape
