@@ -25,49 +25,7 @@ Implementing Lenet-5, a simple and straighforward convolutional neural network a
 • Implementing hidden layers and forward pass.</br>
 • Implementing back-propagation from scratch.</br>
 • Visualizing and comparing the results on MNSIT data set.</br>
-### Code Structure
-------------------
-
-    ├── MNIST                         
-    ├── images                    
-    ├── src  
-    ├   ├── Results
-    ├   ├   ├── #plot images      
-    ├   ├── notebooks 
-    ├   ├   ├── Lenet.ipynb
-    ├   ├   ├── model-relu-tanh-28-512-adam.pickle
-    ├   ├── scripts 
-    ├   ├   ├── RBF_init.py
-    ├   ├   ├── model.py
-    ├   ├── MNIST_auto_Download.py                          
-    └── README.md
------------
-</br>
-In the above structure, the source code is found in the 'src' directory in 'Lenet.ipynb' file. This notebook book file has
-</br>
-</br>
-
-### Pre-requisites:
- 
-Before running the code, following python libraries are to be installed.
-
-------------------
-numpy  
-opencv  
-afsfa  
-   
------------
-</br>
-
-### Dataset:
-
-We used the Modified NIST (MNIST) dataset which is a subset of the NIST database. It is a database of handwritten digits with a training set of 60,000 samples and a test set of 10,000 samples. This dataset is downloaded using MNIST_auto_Download.py file (found online).</br>
-Ref: http://yann.lecun.com/exdb/mnist/
-</br>
-</br>
-
-### Timeline (Year 2021):
-
+### Timeline (Year 2021):</br>
 </br>
 
 | Timeline | Milestone |
