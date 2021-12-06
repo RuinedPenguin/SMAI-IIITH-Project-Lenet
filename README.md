@@ -32,17 +32,24 @@ Implementing Lenet-5, a simple and straighforward convolutional neural network a
 ### Code Structure
 ------------------
 
-    ├── MNIST                         
-    ├── images                    
+    ├── MNIST      #Dataset                       
+    ├── images     #Images for readme file               
     ├── src  
     ├   ├── Results
     ├   ├   ├── #plot images      
     ├   ├── notebooks 
     ├   ├   ├── Lenet.ipynb
-    ├   ├   ├── model-relu-tanh-28-512-adam.pickle
+    ├   ├   ├── model-relu-tanh-28-512-adam.pickle  #Best model
+    ├   ├   ├── #Some other experimental models
     ├   ├── scripts 
     ├   ├   ├── RBF_init.py
-    ├   ├   ├── model.py
+    ├   ├   ├── main.py
+    ├   ├   ├── lenet.py
+    ├   ├   ├── layers.py
+    ├   ├── app 
+    ├   ├   ├── static
+    ├   ├   ├── templates
+    ├   ├   ├── app.py
     ├   ├── MNIST_auto_Download.py                          
     └── README.md
 -----------
@@ -69,7 +76,7 @@ sklearn
 
 ### Dataset:
 
-We used the Modified NIST (MNIST) dataset which is a subset of the NIST database. It is a database of handwritten digits with a training set of 60,000 samples and a test set of 10,000 samples. This dataset is downloaded using MNIST_auto_Download.py file (found online).</br>
+We used the Modified NIST (MNIST) dataset which is a subset of the NIST database. It is a database of handwritten digits with a training set of 60,000 samples and a test set of 10,000 samples. </br>
 Ref: http://yann.lecun.com/exdb/mnist/
 </br>
 
