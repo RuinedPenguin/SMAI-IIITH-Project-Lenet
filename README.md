@@ -101,11 +101,14 @@ The result is supposed to be :</br>
 | 26<sup>th</sup> Oct  | Project Allocation  |
 | 7<sup>th</sup> Nov  | Project Proposal Submission  |
 | 8<sup>th</sup> Nov - 11<sup>th</sup> Nov  | Paper and relevant work reading  |
-| 12<sup>th</sup> Nov – 17<sup>th</sup> Nov  | Implementing hidden layers and forward pass |
+| 12<sup>th</sup> Nov – 17<sup>th</sup> Nov  | Implementing hidden layers and Forward pass |
 | 18<sup>th</sup> Nov – 20<sup>th</sup> Nov  | Mid evaluation  |
-| 21<sup>st</sup> Nov – 27<sup>th</sup> Nov  | Backpropagation implementation  |
-| 27<sup>th</sup> Nov – 3<sup>rd</sup> Dec  | Training, testing, Analysis and ppt preparation  |
-| 4<sup>th</sup> Dec  | Final Evaluation  |
+| 21<sup>st</sup> Nov – 30<sup>th</sup> Nov  | Backpropagation implementation  |
+| 1<sup>st</sup> Dec – 4<sup>th</sup> Dec  | Code Verification, Training, Testing, Analysis  |
+| 4<sup>th</sup> Dec – 5<sup>th</sup> Dec  | Code documentation and cleaning, GUI implementation  |
+| 6<sup>th</sup> Dec  | PPT preparation  |
+| 7<sup>th</sup> Dec  | Project Submission  |
+| 10<sup>th</sup> Dec  | Viva  |
 
 </br>
 
