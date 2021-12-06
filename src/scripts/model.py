@@ -7,7 +7,8 @@ from RBF_init import rbf_initialize
 __builtin_funcs__ =  {
     'tanh' : (lambda x : 1.7159*np.tanh(2*x/3), lambda x : 1.14393*(1-np.power(np.tanh(2*x/3),2))),
     'mse' : (lambda x,y : np.mean(np.square(y - x)), lambda x,y : -np.mean(y - x, axis=1)),
-    'sigmoid':(lambda x : 1 / (1 + np.exp(-x)), lambda x : np.exp(-x) / np.power((1+np.exp(-x)),2))
+    'sigmoid':(lambda x : 1 / (1 + np.exp(-x)), lambda x : np.exp(-x) / np.power((1+np.exp(-x)),2)),
+    'relu' : (lambda x : np.maximum(x,0), lambda x : (x>0)*1 )
 }
 
 def initialize(shape):
@@ -98,7 +99,7 @@ class Conv2D(BaseLayer):
         return f"CONV2D{self.param_shape ,  self.params[1].shape}"
 
 
-class SubSample(object):
+class SubSample(BaseLayer):
 
     def __init__(self, kernel_shape, stride = 2, padding = 0) -> None:
         super().__init__()
@@ -236,16 +237,16 @@ class Lenet_SMAI(object):
         self.name = name
         self.layers = [
             Conv2D(6, (5,5)),
-            Activation(),
+            Activation("relu"),
             SubSample(2),
             Conv2D(16, (5,5)),
-            Activation(),
+            Activation("relu"),
             SubSample(2),
             Conv2D(120, (5,5)),
-            Activation(),
+            Activation("relu"),
             Dense(84),
-            Activation(),
-            RBF(10)
+            Activation("relu"),
+            RBF(10,)
         ]
         self.input_shape = input_shape
         prev_input_shape = input_shape
