@@ -16,7 +16,7 @@
 <body>
     <div class="results">
         {%if prediction%}
-        <h2 style="color:red;">Looks like a {{ prediction[0] }} ! </h2>
+        <h2 style="color:red;">Looks like a {{ prediction['pred'][0] }} ! </h2>
         {%else%}
          <h2 style="color:red;">Nothing to predict ! </h2>
         {%endif%}

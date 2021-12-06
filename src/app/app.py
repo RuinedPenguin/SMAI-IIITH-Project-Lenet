@@ -60,7 +60,8 @@ def predict():
         resized = normalize(cv2.resize(image, (32,32), interpolation = cv2.INTER_AREA))
         # plt.imsave('ex.jpeg', resized)
         pred = model(resized.reshape(1,32,32,1) , mode = 'test')
-        return render_template('results.html', prediction = pred)
+        print(pred)
+        return render_template('results.html', prediction = {'pred' : pred})
 
 
 if __name__ == '__main__':
