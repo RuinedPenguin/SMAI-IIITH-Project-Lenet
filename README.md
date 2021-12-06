@@ -63,7 +63,6 @@ Before running the code, following python libraries are to be installed.
 
 ------------------
 numpy  
-opencv  
 matplotlib  
 opencv2  
 flask  
